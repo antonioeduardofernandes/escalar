@@ -1,246 +1,336 @@
-# Escalar — Visão do Produto
+# Visão do Produto — Escalar
 
 ## 1. Identificação
 
 **Nome:** Escalar
-**Descrição:** Sistema de Gestão de Escalas Hospitalares
 
-O Escalar é um sistema destinado à gestão das escalas hospitalares, contemplando servidores, lotações, jornadas, equipes, intercorrências, compensações, dimensionamento, fechamento, auditoria e relatórios.
+**Descrição:** Sistema de Gestão de Escalas Hospitalares.
 
-O sistema deve substituir o uso operacional disperso de planilhas por uma estrutura centralizada, rastreável e baseada em regras de negócio.
+O Escalar é um sistema para planejar, organizar, validar, materializar, fechar e consultar escalas hospitalares, considerando servidores, setores, jornadas, equipes, modelos de trabalho, ocorrências, compensações e dimensionamento de cobertura.
 
----
+O sistema deve apoiar a gestão operacional de escalas, reduzindo trabalho manual, inconsistências e conflitos de jornada.
 
-## 2. Objetivo
+O Escalar não é, nesta etapa, um sistema de frequência, folha de pagamento ou cálculo de remuneração.
 
-O objetivo do Escalar é permitir que a instituição:
+## 2. Princípios fundamentais
 
-* mantenha o cadastro dos servidores;
-* controle suas lotações;
-* organize as equipes;
-* planeje e materialize escalas mensais;
-* aplique regras de jornada;
-* registre intercorrências;
-* controle faltas e compensações;
-* acompanhe carga horária;
-* avalie cobertura/dimensionamento;
-* feche as escalas;
-* preserve histórico;
-* gere relatórios;
-* mantenha rastreabilidade das alterações.
+O desenvolvimento e a operação do sistema devem respeitar estes princípios:
 
----
+1. **Nós definimos. O agente registra e executa.** As regras de negócio são decididas pelos responsáveis pelo projeto. O agente de desenvolvimento não pode inventar regras para preencher lacunas.
+2. **A automação propõe. O gestor decide.** O sistema pode gerar sugestões, identificar inconsistências e apontar necessidades, mas não deve tomar decisões administrativas que dependam de autorização humana.
+3. **A escala materializada é a fonte da verdade do planejamento registrado.** Alterações posteriores em cadastros, modelos, vigências ou calendários não podem modificar silenciosamente escalas materializadas.
+4. **Planejamento, materialização e realização são conceitos distintos.** Uma jornada planejada não representa, por si só, confirmação de comparecimento ou realização efetiva.
+5. **Ocorrências não apagam o planejamento original.** Faltas, licenças e outras ocorrências devem ser registradas sem eliminar o histórico do plantão originalmente planejado.
+6. **A APH é trabalho real, mas separado da escala ordinária.** Deve ser identificada individualmente e considerada nas validações operacionais aplicáveis.
+7. **Regras não definidas são pendências.** O agente deve registrá-las e solicitar decisão humana antes de implementar comportamentos que dependam delas.
 
-## 3. Abrangência
+## 3. Objetivos do sistema
 
-O sistema deve ser concebido para utilização em todo o hospital.
+O Escalar deve permitir:
 
-Cada setor/unidade pode possuir sua própria escala.
+* manter o cadastro dos servidores e suas informações funcionais;
+* organizar servidores em equipes administrativas;
+* configurar modelos de escala e suas vigências;
+* gerar escalas de diaristas e plantonistas conforme as regras aplicáveis;
+* validar conflitos e intervalos entre jornadas;
+* manter a escala ordinária e a APH identificáveis separadamente;
+* registrar férias, licenças e faltas;
+* controlar dívidas e quitações integrais de compensação;
+* definir e acompanhar o dimensionamento da cobertura por setor e turno;
+* materializar, fechar e reabrir escalas conforme as permissões;
+* preservar o histórico das alterações relevantes;
+* disponibilizar consultas e relatórios compatíveis com as permissões dos usuários.
 
-A estrutura deve permitir que um servidor pertença a um setor e, excepcionalmente, possa atuar em outro setor por meio de APH.
+## 4. Escopo funcional
 
----
+### 4.1. Cadastro de servidores
 
-## 4. Princípio central
+O cadastro deve conter os seguintes campos obrigatórios de identificação:
 
-A regra fundamental do sistema é:
+* matrícula;
+* nome;
+* CPF;
+* e-mail;
+* situação ativa ou inativa.
 
-> **Automação propõe. O gestor decide. A escala materializada é a fonte da verdade.**
+A data de nascimento é opcional. Não haverá campo de nome social.
 
-O sistema pode utilizar regras para sugerir, validar ou identificar conflitos.
+Os dados funcionais são:
 
-A automação não deve substituir a decisão do responsável pela escala.
+* cargo;
+* vínculo;
+* regime;
+* lotação principal.
 
-Depois de confirmada/materializada, a escala representa o que efetivamente foi definido para aquele período.
+Não haverá campos separados de função ou categoria profissional.
 
----
+A matrícula é única por servidor e funciona como identificador institucional e do sistema.
 
-## 5. Escalas
+Os vínculos possíveis são:
 
-As escalas são organizadas mensalmente.
+* Ministério da Saúde;
+* Fiotec;
+* Estado;
+* contrato temporário, com identificação do certame, como 6º, 7º ou 8º certame.
 
-O sistema deve trabalhar com o conceito de ciclo mensal.
+Cada servidor possui uma única lotação principal vigente por vez. Uma transferência encerra a lotação anterior e inicia a nova, sem sobreposição de períodos.
 
-A escala pode ser planejada, revisada, confirmada e posteriormente fechada.
+A atuação em APH em outro setor não modifica a lotação principal.
 
----
+A inativação não exclui o histórico nem cancela automaticamente plantões já materializados. A reativação não pode duplicar registros existentes.
 
-## 6. Jornadas principais
+### 4.2. Equipes
 
-As jornadas previamente definidas incluem:
+Uma equipe é um agrupamento administrativo de servidores que seguem um padrão de escala. Não representa necessariamente uma equipe clínica real.
 
-### SD
+Não haverá campo de líder ou responsável pela equipe.
 
-07:00 às 19:00.
+Cada servidor pode pertencer a somente uma equipe por vez, sem sobreposição de vínculos. A relação entre servidor e equipe possui vigência individual.
 
-### SN
+### 4.3. Modelos de escala
 
-19:00 às 07:00.
+O modelo representa um ciclo parametrizado de trabalho e descanso.
 
-### DN
+Seus parâmetros devem permitir representar a duração do trabalho, o tipo de turno e o período de descanso, conforme o modelo aprovado.
 
-24 horas, das 07:00 às 07:00 do dia seguinte.
+O modelo não é uma lista arbitrária de dias da semana nem define, por si só, a quantidade de profissionais necessários para a cobertura.
 
-Para fins de carga/jornada, DN corresponde a dois plantões de 12 horas.
+A aplicação do modelo à equipe possui uma data final, prorrogável pelo gestor autorizado. Cada servidor também possui sua própria vigência no vínculo com a equipe.
 
-### M
+O sistema não deve gerar escalas indefinidamente.
 
-07:00 às 13:00.
+Alterações nos modelos, nas vigências ou nos vínculos não podem modificar silenciosamente escalas já materializadas.
 
-### T
+### 4.4. Jornadas padrão
 
-13:00 às 19:00.
+As jornadas padrão são:
 
-### MT
+| Código | Horário                 |  Duração |
+| ------ | ----------------------- | -------: |
+| SD     | 07h–19h                 | 12 horas |
+| SN     | 19h–07h do dia seguinte | 12 horas |
+| DN     | 07h–07h do dia seguinte | 24 horas |
+| M      | 07h–13h                 |  6 horas |
+| T      | 13h–19h                 |  6 horas |
 
-Jornada configurável, podendo contemplar jornadas de 8 ou 10 horas, com horário de entrada e saída configuráveis.
+Jornadas especiais exigem parâmetros explicitamente definidos e aprovados.
 
----
+O sistema deve sinalizar sobreposições, conflitos entre setores, intervalos inferiores a 12 horas entre jornadas e sequências proibidas de 36 horas, conforme a regra institucional.
 
-## 7. Jornadas especiais
+A APH também está sujeita às validações temporais aplicáveis.
 
-O sistema deve permitir jornadas/plantões especiais diferentes do padrão de 12 horas quando autorizados pela chefia.
+### 4.5. Plantonistas e diaristas
 
-Essas jornadas não devem ser criadas automaticamente.
+O sistema distingue plantonistas e diaristas.
 
-A autorização da chefia é necessária.
+Para diaristas, o gestor seleciona M ou T. O sistema gera automaticamente os dias de segunda a sexta no período aplicável, excluindo sábados, domingos, feriados federais oficiais e datas institucionais adicionais cadastradas e vigentes.
 
----
+Diaristas não estão sujeitos à referência mensal de 120 horas.
 
-## 8. Regra das 36 horas
+A referência de 120 horas mensais aplica-se ao planejamento ordinário dos plantonistas. SD e SN correspondem a 12 horas cada; DN corresponde a 24 horas. A APH não compõe essa referência.
 
-O sistema deve impedir a programação incompatível com a regra estabelecida de descanso entre plantões.
+### 4.6. Calendário de feriados e pontos facultativos
 
-A regra geral definida para o sistema é:
+O calendário oficial federal é a referência padrão para os feriados considerados pelo sistema.
 
-* mínimo de 12 horas entre plantões;
-* jornadas de 36 horas são proibidas.
+O sistema não deve presumir que feriados estaduais, municipais ou pontos facultativos sejam automaticamente adotados pela instituição.
 
-As regras de validação devem ser aplicadas antes da materialização da escala.
+O Supervisor pode cadastrar datas institucionais adicionais, incluindo feriados estaduais ou municipais adotados pela instituição e pontos facultativos.
 
----
+Cada registro de data adicional deve conter:
 
-## 9. Carga horária
+* nome;
+* data;
+* tipo;
+* indicação de vigência ou ano de aplicação, quando aplicável.
 
-A referência ordinária de planejamento é de **120 horas mensais**.
+O cadastro deve deixar claro que essas datas afetam a geração automática das escalas dos diaristas, não o funcionamento das escalas assistenciais.
 
-Esse valor não deve ser tratado como um limite universal para todos os casos.
+As escalas assistenciais continuam funcionando em sábados, domingos e feriados.
 
-O sistema deve distinguir planejamento/carga ordinária de situações excepcionais, compensações, APH e outras situações previstas nas regras do domínio.
+Alterações no calendário não podem apagar ou modificar silenciosamente escalas já materializadas. Quando uma mudança puder afetar escalas existentes, o sistema deve informar o usuário e exigir uma ação explícita autorizada para qualquer alteração posterior.
 
----
+### 4.7. APH
 
-## 10. APH
+A APH é uma jornada adicional, identificada separadamente da escala ordinária.
 
-APH representa atuação excepcional do servidor em outro setor.
+Deve aparecer no calendário consolidado do servidor e permanecer visualmente distinguível.
 
-O APH é tratado separadamente da carga ordinária.
+A APH:
 
-APH **não compõe a carga horária ordinária** do servidor.
+* é considerada trabalho real para validações de sobreposição, conflitos e intervalo mínimo entre jornadas;
+* não integra a referência mensal de 120 horas ordinárias;
+* pode ser contabilizada na quantidade de profissionais contemplados no dimensionamento, desde que o profissional seja elegível e esteja previsto para o setor, turno e período considerados;
+* não altera a lotação principal;
+* não deve quitar automaticamente uma dívida de compensação.
 
----
+O Escalar não calcula pagamento ou remuneração de APH.
 
-## 11. Intercorrências
+### 4.8. Ocorrências
 
-Intercorrências devem poder ser registradas associadas a períodos específicos.
+As categorias de ocorrência são:
 
-O registro deve possuir código e período.
+* férias;
+* licenças;
+* faltas.
 
-Intercorrências não devem ser artificialmente mescladas em um único registro de um dia quando os períodos forem distintos.
+Férias e licenças possuem períodos de início e fim. Os tipos e códigos de licença são configuráveis pelo Administrador, sem necessidade de alterar o código da aplicação para incluir novos tipos.
 
----
+Uma falta deve ser vinculada a um plantão específico.
 
-## 12. Faltas e compensações
+O gestor classifica a falta como:
 
-Faltas, licenças e férias devem ser consideradas no planejamento.
+* sem compensação;
+* com compensação.
 
-O sistema deve permitir o registro das ocorrências e das respectivas compensações quando aplicáveis.
+Somente faltas classificadas como compensáveis geram dívida de horas.
 
-Esses registros devem preservar o histórico e não apagar silenciosamente o planejamento original.
+A decisão de compensação pertence ao gestor e pode considerar justificativas e tratativas administrativas realizadas fora do sistema.
 
----
+### 4.9. Compensações
 
-## 13. Dimensionamento e cobertura
+A dívida corresponde à duração integral do plantão:
 
-O sistema deve permitir verificar a cobertura da escala em relação às necessidades do setor.
+* SD ou SN: 12 horas;
+* DN: 24 horas.
 
-O dimensionamento deve considerar os servidores e jornadas efetivamente planejados/materializados.
+A compensação exige jornadas completas, sem quitação parcial.
 
-A cobertura deve permitir identificar situações de insuficiência ou conflito.
+Uma dívida de 12 horas exige uma jornada compensatória completa de 12 horas.
 
----
+Uma dívida de 24 horas pode ser quitada por uma jornada completa de 24 horas ou por duas jornadas completas de 12 horas.
 
-## 14. Equipes e modelos
+A simples inclusão de um plantão futuro não quita automaticamente a dívida. A quitação deve ser registrada explicitamente.
 
-O sistema deve possuir conceito de equipes/modelos para facilitar a construção das escalas.
+A APH não quita automaticamente dívidas de compensação.
 
-As equipes e padrões devem poder ser utilizados para aplicar uma estrutura de escala a partir do ingresso do servidor.
+O Escalar não é sistema de folha de pagamento. A compensação é um controle administrativo de horas.
 
-Uma alteração posterior na composição da equipe não deve reescrever automaticamente meses de escala já materializados.
+### 4.10. Dimensionamento
 
----
+O dimensionamento permite que o gestor defina a quantidade de profissionais necessária para a cobertura de um setor em determinado período e turno.
 
-## 15. Planejada x realizada
+A configuração inclui:
 
-O sistema deve preservar a diferença entre:
+* setor;
+* período de vigência;
+* turno diurno ou noturno;
+* quantidade necessária;
+* cargos elegíveis.
 
-* aquilo que foi planejado;
-* aquilo que foi efetivamente materializado;
-* ocorrências posteriores que alteraram a execução.
+O sistema compara a necessidade com os profissionais contemplados no planejamento e identifica déficits, correspondências, excessos e conflitos.
 
-O histórico não deve ser destruído pela edição de dados atuais.
+A APH pode contar na cobertura quando o profissional for elegível e estiver contemplado no setor, turno e período avaliados.
 
----
+O sistema deve evitar contar duas vezes o mesmo servidor para a mesma cobertura temporal.
 
-## 16. Fechamento
+A inclusão de APH no dimensionamento não significa incluir suas horas na referência mensal ordinária de 120 horas.
 
-A escala possui ciclo de vida.
+O dimensionamento não altera automaticamente a escala.
 
-Depois de fechada:
+### 4.11. Materialização
 
-* fica disponível para consulta;
-* alterações posteriores exigem autorização;
-* alterações autorizadas devem ser rastreadas.
+Materializar significa registrar os plantões concretos planejados para um período.
 
-A Divisão de Enfermagem possui papel de controle sobre alterações posteriores ao fechamento.
+Materialização não confirma comparecimento nem realização efetiva do trabalho.
 
----
+A escala materializada é a referência do planejamento registrado. Mudanças posteriores em cadastros, modelos, vínculos, vigências ou calendários não podem alterar silenciosamente seus registros.
 
-## 17. Auditoria
+Quando uma alteração puder afetar escalas materializadas, o sistema deve informar o usuário e exigir uma ação explícita autorizada para qualquer alteração posterior.
 
-O sistema deve preservar rastreabilidade das alterações relevantes.
+### 4.12. Fechamento e reabertura
 
-Deve ser possível identificar alterações importantes realizadas sobre escalas e registros relacionados.
+O fechamento indica que o planejamento de uma escala foi considerado finalizado.
 
----
+Gestor e Supervisor podem materializar e fechar escalas dentro de seus respectivos escopos.
 
-## 18. Interface
+O Supervisor possui acesso a todos os setores.
 
-A interface deve priorizar:
+Somente Supervisor e Divisão de Enfermagem podem reabrir escalas fechadas.
 
-* leitura rápida;
-* visão mensal;
-* identificação clara dos servidores;
-* identificação dos turnos;
-* indicação de conflitos;
-* distinção entre planejado e materializado;
-* acesso às ocorrências;
-* filtros por setor/unidade.
+A Divisão de Enfermagem possui acesso a todos os setores e pode reabrir escalas fechadas. As permissões operacionais adicionais desse papel ainda precisam ser definidas explicitamente; não se deve presumir que sejam iguais às do Supervisor.
 
----
+A reabertura não apaga o fechamento anterior nem o histórico da escala.
 
-## 19. Regra para evolução
+A existência de uma ocorrência ou falta não impede automaticamente o fechamento.
 
-O agente de desenvolvimento não deve criar regras de negócio por inferência.
+## 5. Papéis e responsabilidades
 
-Quando uma decisão de negócio não estiver documentada, ela deve ser tratada como pendência de requisito.
+### Administrador
 
----
+Responsável pela manutenção administrativa e estrutural do sistema, incluindo usuários, configurações administrativas, cadastros estruturais e tipos e códigos de licença.
 
-## 20. Fonte da verdade
+Não recebe automaticamente permissões operacionais de gestor de escala.
 
-Este documento, juntamente com os demais documentos de regras de negócio do diretório `docs/`, representa a referência funcional do Escalar.
+### Servidor
 
-A implementação técnica pode evoluir sem alterar essas regras.
+Pode consultar a própria escala e as informações disponibilizadas para sua visualização. Não pode editar escalas nem acessar dados restritos de outros servidores.
 
-Alterações nas regras devem ser explicitamente aprovadas e documentadas. 
+### Gestor
+
+Atua nos setores atribuídos ao seu escopo.
+
+Pode planejar e ajustar escalas abertas, configurar equipes e modelos, definir dimensionamento, registrar ocorrências, decidir se uma falta específica será compensável, materializar e fechar escalas.
+
+Pode prorrogar a vigência de aplicação dos modelos dentro das regras autorizadas.
+
+Não pode reabrir uma escala fechada.
+
+### Supervisor
+
+Possui acesso operacional a todos os setores.
+
+Pode editar escalas dentro das regras institucionais, materializar, fechar e reabrir escalas, além de cadastrar feriados institucionais adicionais e pontos facultativos.
+
+### Divisão de Enfermagem
+
+Possui acesso a todos os setores e pode reabrir escalas fechadas.
+
+As permissões operacionais adicionais desse papel não devem ser presumidas. Permanecem pendentes de definição explícita.
+
+## 6. Fechamento e auditoria
+
+O sistema deve preservar o histórico das operações relevantes, incluindo materialização, fechamento, reabertura, alterações de escalas, alterações do calendário, decisões de compensação e quitação de dívidas.
+
+O modelo técnico da auditoria, os dados exatos de cada evento e a política de retenção serão definidos na etapa de arquitetura.
+
+A implementação deve preservar a possibilidade de compreender as operações realizadas e não pode apagar silenciosamente estados anteriores.
+
+## 7. Relatórios
+
+O sistema deve oferecer consultas e relatórios compatíveis com as permissões dos usuários, incluindo:
+
+* escala individual;
+* escala por setor e período;
+* jornadas ordinárias e APH;
+* carga horária ordinária planejada;
+* ocorrências e compensações;
+* dívidas em aberto e quitações;
+* dimensionamento e cobertura;
+* déficits, correspondências, excessos e conflitos.
+
+A APH deve permanecer identificável separadamente nos relatórios, mesmo quando apresentada junto com a escala ordinária.
+
+Os formatos de exportação serão definidos na arquitetura e no planejamento de implementação.
+
+## 8. Limites do produto
+
+Nesta etapa, o Escalar não deve ser tratado como:
+
+* sistema de frequência;
+* sistema de folha de pagamento;
+* calculadora de remuneração;
+* sistema de avaliação de produtividade;
+* mecanismo de alteração automática de escalas sem autorização.
+
+Funcionalidades adicionais dependem de decisão explícita de escopo.
+
+## 9. Regra para desenvolvimento
+
+O agente de desenvolvimento deve implementar somente comportamentos apoiados em regras de negócio aprovadas.
+
+Quando uma regra estiver ausente, ambígua ou contraditória, deve registrar a pendência e solicitar decisão humana.
+
+O agente não pode inventar regras, permissões, exceções ou comportamentos para completar a implementação.
+
+A arquitetura técnica deve respeitar os princípios e as regras descritos nesta visão do produto.
