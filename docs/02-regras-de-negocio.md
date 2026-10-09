@@ -1,16 +1,14 @@
-# Escalar — Regras de Negócio
+Escalar — Regras de Negócio
 
-## 1. Regra central
+1. Regra central
 
-> **Automação propõe. O gestor decide. A escala materializada é a fonte da verdade.**
+«Automação propõe. O gestor decide. A escala materializada é a fonte da verdade do planejamento registrado.»
 
 Nenhum algoritmo de geração automática pode substituir uma decisão explícita do responsável pela escala.
 
-O sistema pode sugerir alocações, identificar conflitos, validar regras e apontar insuficiências, mas não deve alterar silenciosamente uma decisão já tomada pelo gestor.
+O sistema pode sugerir alocações, identificar conflitos, validar regras e apontar insuficiências, mas não deve alterar silenciosamente uma decisão já tomada nem contornar uma regra impeditiva.
 
----
-
-## 2. Escopo deste documento
+2. Escopo deste documento
 
 Este documento consolida as regras de negócio centrais e transversais do Escalar.
 
@@ -20,286 +18,361 @@ Quando houver conflito entre uma regra geral deste documento e uma regra especí
 
 Uma decisão de negócio que ainda não tenha sido definida não deve ser inventada para completar a implementação.
 
----
+3. Escopo e finalidade do produto
 
-## 3. Servidor
+A missão principal do Escalar é organizar, elaborar, validar, materializar, controlar, auditar e disponibilizar informações relacionadas às escalas hospitalares.
+
+O cadastro de servidores é acessório e instrumental. Deve atender às necessidades de identificação operacional, elaboração das escalas, aplicação das regras de negócio, auditoria e geração de relatórios.
+
+O Escalar não substitui sistemas de gestão de pessoas e não mantém uma identidade permanente da pessoa física ao longo de diferentes vínculos institucionais.
+
+Cada matrícula corresponde a uma entidade "Servidor" independente. Matrículas diferentes podem representar a mesma pessoa física sem que o sistema precise relacionar ou unificar esses registros.
+
+Entre alternativas que atendam igualmente às necessidades operacionais, deve-se priorizar a solução mais simples, segura e auditável.
+
+4. Servidor e identificação
 
 A matrícula é a identificação única do servidor no Escalar.
 
-Deve existir apenas um cadastro de servidor para cada matrícula.
+Deve existir apenas um cadastro para cada matrícula. A matrícula é obrigatória, única e imutável após a criação.
 
-São dados de identificação do servidor:
+Os dados cadastrais operacionais são:
 
-* matrícula;
-* nome;
-* CPF;
-* e-mail;
-* ativo;
-* data de nascimento, opcional.
+- matrícula;
+- nome;
+- e-mail;
+- cargo;
+- vínculo institucional;
+- lotação principal;
+- situação ativa ou inativa.
 
-Não existe nome social no cadastro do Escalar.
+CPF e data de nascimento não fazem parte do cadastro. Não existe campo de nome social, função, categoria profissional ou regime independente.
 
-A estrutura detalhada do cadastro de servidores deve ser definida em `04-cadastros-e-lotacoes.md`.
+Cargo e vínculo institucional são selecionados de listas administráveis. Somente o Administrador pode manter essas listas.
 
----
+Uma nova matrícula representa uma nova entidade "Servidor", ainda que a pessoa física já esteja cadastrada sob outra matrícula.
 
-## 4. Identidade e continuidade do cadastro
+Cargo e vínculo institucional são imutáveis após a criação do cadastro. As regras para correção de erros nesses campos devem preservar a integridade e a rastreabilidade dos registros. Não se deve criar um mecanismo de conciliação entre matrículas.
 
-A matrícula identifica unicamente o servidor dentro do sistema.
+As alterações cadastrais permitidas devem preservar o histórico quando necessário para compreender registros anteriores.
 
-Uma nova matrícula representa um novo registro de servidor.
+A estrutura detalhada do cadastro de servidores deve ser definida em "04-cadastros-e-lotacoes.md".
 
-Alterações cadastrais permitidas devem atualizar os dados correspondentes sem criar um novo servidor quando a identidade do registro continuar sendo a mesma.
+5. Papéis, permissões e âmbito de atuação
 
-As regras específicas de imutabilidade e alteração dos dados funcionais devem ser respeitadas conforme definido para o cadastro.
+O Escalar possui exatamente quatro papéis:
 
-Dentro do mesmo cadastro:
+- Administrador;
+- Servidor;
+- Gestor;
+- Supervisor.
 
-* matrícula é imutável;
-* cargo é imutável;
-* vínculo é imutável;
-* regime pode ser alterado sem alterar a matrícula, o cargo ou o vínculo.
+O papel define o que o usuário pode fazer. O âmbito de atuação define em quais unidades pode executar essas ações.
 
-Correções cadastrais permitidas não devem criar registros duplicados para o mesmo servidor.
+As permissões devem ser verificadas no backend, não apenas pela exibição ou ocultação de opções na interface.
 
----
+O Administrador mantém a estrutura administrativa e as configurações autorizadas, mas não recebe automaticamente permissões operacionais de gestão de escalas.
 
-## 5. Lotação
+O Servidor consulta apenas a própria escala e as informações autorizadas para sua visualização.
 
-A lotação representa a vinculação operacional do servidor a uma unidade/setor.
+O Gestor atua nas unidades de seu âmbito, podendo executar as operações de escala autorizadas, mas não pode criar, editar, desativar ou reativar servidores.
 
-A lotação possui histórico.
+O Supervisor pode manter cadastros de servidores e executar operações de escala autorizadas, dentro do âmbito permitido. É o único papel autorizado a reabrir escalas fechadas.
 
-Alterações de lotação devem preservar o histórico anterior e não devem apagar a informação de onde o servidor esteve anteriormente lotado.
+A Divisão de Enfermagem é uma unidade organizacional, não um papel. Usuários dessa unidade devem possuir um dos quatro papéis definidos.
 
-A alteração da lotação é controlada pela Divisão de Enfermagem.
+O detalhamento das permissões deve permanecer em "03-permissoes-e-papeis.md".
 
-A lotação deve ser considerada nas regras de alocação e validação da escala.
+6. Lotação
 
-Uma alocação incompatível com as regras de lotação deve ser identificada e impedida quando a regra aplicável estiver definida.
+A lotação representa a vinculação operacional principal do servidor a uma unidade.
 
-As regras detalhadas de cadastro, alteração e vigência das lotações devem ser definidas em `04-cadastros-e-lotacoes.md`.
+Cada servidor possui uma única lotação principal vigente por vez. A lotação deve manter histórico de períodos, sem sobreposição.
 
----
+A alteração da lotação deve preservar a informação anterior e respeitar sua vigência.
 
-## 6. Escala
+A atuação em APH em outra unidade não altera, por si só, a lotação principal.
 
-A escala é organizada por período mensal.
+A lotação deve ser considerada nas regras de alocação e validação da escala. Alterações de lotação não podem reescrever silenciosamente escalas existentes.
 
-Cada escala possui um ciclo que contempla, conforme aplicável:
+As regras detalhadas de cadastro, alteração e vigência das lotações devem ser definidas em "04-cadastros-e-lotacoes.md".
 
-1. planejamento;
-2. revisão e ajustes;
-3. confirmação/materialização;
-4. fechamento;
-5. eventuais alterações posteriores autorizadas.
+7. Escala mensal
 
-A escala materializada representa a decisão definida para aquele período.
+A escala é organizada por unidade e período mensal.
 
-A materialização não deve ser confundida com a realização efetiva dos plantões.
+Seu ciclo operacional contempla, conforme aplicável:
 
-O que foi materializado deve permanecer preservado mesmo quando ocorrências posteriores alterarem o que efetivamente aconteceu.
+1. início da elaboração;
+2. geração de proposta e revisão;
+3. ajustes manuais;
+4. validação;
+5. materialização;
+6. fechamento;
+7. publicação;
+8. eventuais alterações posteriores autorizadas, com reabertura quando exigida.
 
----
+A escala materializada representa o planejamento registrado para aquele período. A materialização não deve ser confundida com a realização efetiva dos plantões.
 
-## 7. Planejada, materializada e realizada
+A publicação comunica a versão oficial aos servidores e não substitui os registros de materialização ou fechamento.
+
+8. Planejada, materializada e realizada
 
 O Escalar deve distinguir:
 
-* **planejada:** aquilo que está sendo construído durante o planejamento;
-* **materializada:** aquilo que foi confirmado e passou a representar a escala definida para o período;
-* **realizada:** aquilo que efetivamente ocorreu na execução.
+- Planejada: a escala em elaboração, sujeita a ajustes e validações.
+- Materializada: o planejamento concreto registrado como uma versão da escala.
+- Realizada: o trabalho que efetivamente ocorreu, conforme as informações registradas no sistema.
 
-Esses estados não devem ser tratados como equivalentes.
+Esses conceitos não são equivalentes.
 
 Uma alteração posterior na execução não deve apagar ou reescrever silenciosamente a informação anteriormente planejada ou materializada.
 
-Ocorrências posteriores devem ser registradas de forma que seja possível compreender a diferença entre o que foi planejado, o que foi materializado e o que efetivamente ocorreu.
+Ocorrências posteriores devem ser registradas de modo que seja possível compreender a diferença entre o planejamento original, a versão materializada e o que efetivamente ocorreu.
 
----
-
-## 8. Jornadas e plantões
+9. Jornadas e plantões
 
 Os plantões devem obedecer às regras de jornada estabelecidas pelo Escalar.
 
+As jornadas padrão são:
+
+Código| Horário| Duração
+SD| 07h–19h| 12 horas
+SN| 19h–07h do dia seguinte| 12 horas
+DN| 07h–07h do dia seguinte| 24 horas
+M| 07h–13h| 6 horas
+T| 13h–19h| 6 horas
+
 Entre as regras gerais:
 
-* deve ser respeitado o intervalo mínimo de 12 horas entre jornadas, conforme as regras aplicáveis;
-* jornadas de 36 horas são proibidas;
-* combinações incompatíveis de jornadas devem ser identificadas e impedidas;
-* jornadas especiais somente podem existir quando autorizadas conforme as regras definidas para o sistema.
+- deve ser respeitado o intervalo mínimo de 12 horas entre jornadas, conforme as regras aplicáveis;
+- sequências proibidas de 36 horas devem ser impedidas;
+- sobreposições e combinações incompatíveis de jornadas devem ser identificadas e impedidas quando constituírem violações obrigatórias;
+- jornadas especiais somente podem existir quando seus parâmetros tiverem sido explicitamente aprovados;
+- conflitos entre unidades e entre escala ordinária e APH devem ser considerados nas validações temporais.
 
-Os tipos de jornada, horários, equivalências e regras detalhadas de combinação devem ser definidos em `05-escalas-e-plantoes.md`.
+Os tipos de jornada, horários, equivalências e regras detalhadas de combinação devem ser definidos em "05-escalas-e-plantoes.md".
 
-O documento específico de escalas e plantões é a referência para o detalhamento operacional dessas regras.
+10. Carga horária ordinária
 
----
+A referência de planejamento ordinário é de 120 horas mensais para plantonistas.
 
-## 9. Carga horária
+Essa referência não é um limite universal aplicável indistintamente a todos os servidores e situações.
 
-A referência ordinária de planejamento é de **120 horas mensais**.
+Para essa referência:
 
-As 120 horas não constituem um limite universal aplicável indistintamente a todos os servidores e situações.
+- SD corresponde a 12 horas;
+- SN corresponde a 12 horas;
+- DN corresponde a 24 horas;
+- APH não integra a carga horária ordinária;
+- diaristas não estão sujeitos à referência mensal de 120 horas.
 
-A apuração da carga deve considerar as regras específicas do regime, das jornadas e das situações excepcionais previstas no sistema.
+A carga horária apresentada no Escalar representa planejamento de jornada, não cálculo de frequência, folha de pagamento ou remuneração.
 
-APH deve ser tratado separadamente da carga horária ordinária.
+As regras detalhadas de apuração devem ser definidas nos documentos específicos de escalas, jornadas e APH.
 
-As regras detalhadas de cálculo e apuração devem ser definidas nos documentos específicos de escalas, jornadas e APH.
+11. APH
 
----
+APH representa uma jornada adicional, separada da escala ordinária.
 
-## 10. APH
+APH não altera, por si só, a lotação principal do servidor e não compõe a referência de 120 horas ordinárias.
 
-APH representa trabalho excepcional realizado em outro setor.
+APH é trabalho real e deve ser considerada nas validações de sobreposição, intervalo mínimo e demais regras temporais aplicáveis.
 
-APH é separado da lotação principal do servidor.
+APH pode ser contabilizada no dimensionamento quando o profissional for elegível e estiver previsto para a unidade, turno e período avaliados.
 
-APH não altera, por si só, a lotação principal do servidor.
+O sistema deve evitar contar duas vezes o mesmo servidor para a mesma cobertura temporal.
 
-APH não compõe a carga horária ordinária para os fins definidos nas regras do Escalar.
+APH não quita automaticamente dívidas de compensação.
 
-As regras detalhadas de lançamento, período, autorização e apuração de APH devem ser definidas no documento correspondente.
+O Escalar não calcula pagamento ou remuneração de APH. As regras detalhadas devem permanecer nos documentos específicos do domínio.
 
----
+12. Equipes e modelos
 
-## 11. Alteração de regime
+Equipes e modelos facilitam a construção das escalas, mas não substituem a decisão do responsável.
 
-A alteração do regime do servidor não deve modificar retroativamente plantões já materializados.
+A equipe é um agrupamento administrativo. Cada servidor pode pertencer a apenas uma equipe por vez, e cada relação servidor-equipe possui sua própria vigência.
 
-A alteração deve respeitar sua vigência aplicável ao cadastro.
+A aplicação do modelo a uma equipe possui período de vigência e data final. O sistema não deve gerar escalas indefinidamente.
 
-Escalas e registros anteriores à vigência da alteração devem permanecer preservados.
+Uma alteração posterior em equipe, modelo ou vigência não deve reescrever automaticamente escalas existentes, sobretudo versões materializadas ou fechadas.
 
-Uma alteração de regime não deve reescrever automaticamente escalas já materializadas.
+A escala materializada prevalece como registro do planejamento efetivamente confirmado para o período, mesmo que o modelo utilizado seja posteriormente alterado.
 
-As regras detalhadas de vigência devem ser definidas em `04-cadastros-e-lotacoes.md`.
+As regras detalhadas devem permanecer em "06-equipes-e-modelos.md".
 
----
+13. Geração sugerida da escala mensal
 
-## 12. Equipes e modelos
+Ao iniciar a elaboração de um novo mês, o sistema deve permitir sugerir o preenchimento com base nos modelos vigentes e nas relações aplicáveis entre servidores e equipes.
 
-Equipes e modelos podem ser utilizados para facilitar a construção das escalas.
+A geração deve apresentar uma prévia obrigatória antes de modificar a matriz.
 
-A aplicação de uma equipe ou modelo deve respeitar a vigência definida para sua utilização.
+A prévia deve identificar:
 
-Uma alteração posterior em equipe ou modelo não deve reescrever automaticamente meses anteriores já materializados.
+- turnos propostos;
+- células já preenchidas que serão preservadas;
+- conflitos bloqueantes;
+- alertas para análise;
+- pendências relevantes identificadas.
 
-A escala materializada prevalece sobre o modelo utilizado para sua construção.
+Por padrão, a aplicação da proposta preenche apenas células vazias. A substituição de turnos existentes exige prévia específica, revisão e confirmação explícita.
 
-As regras detalhadas de equipes e modelos devem ser definidas em `06-equipes-e-modelos.md`.
+Conflitos bloqueantes devem ser resolvidos antes da aplicação integral de uma proposta que os contenha. Alertas devem ser apresentados separadamente conforme as regras aplicáveis.
 
----
+Se dados relevantes mudarem entre a prévia e a confirmação, a proposta deve ser invalidada ou recalculada.
 
-## 13. Intercorrências
+A confirmação aplica somente as alterações permitidas e mantém a escala em elaboração. Não materializa nem fecha automaticamente a escala.
 
-Intercorrências podem representar situações ocorridas durante determinado período.
+O mês anterior deve estar disponível para consulta e comparação, sem cópia automática de turnos para o novo mês.
 
-Uma intercorrência deve possuir:
+14. Validação, conflitos e pendências
 
-* código;
-* período.
+A validação deve distinguir três categorias:
 
-Períodos distintos devem permanecer identificáveis individualmente.
+1. Bloqueios: violações de regras que impedem a operação correspondente.
+2. Alertas: situações que exigem análise, sem serem automaticamente classificadas como violações impeditivas.
+3. Pendências operacionais: tarefas necessárias para concluir ou revisar a escala, como células vazias ou alterações que precisam de análise.
 
-Períodos distintos não devem ser artificialmente mesclados em um único dia quando isso eliminar a informação sobre sua duração ou ocorrência.
+A classificação deve decorrer das regras de negócio aprovadas. O sistema não pode reclassificar uma violação obrigatória como simples alerta para permitir a continuidade da operação.
 
-As regras detalhadas de tipos, códigos, períodos e efeitos das intercorrências devem ser definidas em `07-intercorrencias-e-compensacoes.md`.
+A validação deve ocorrer durante as alterações relevantes e de forma completa antes da materialização.
 
----
+A validação incremental pode atualizar rapidamente os indicadores afetados, mas a validação definitiva do backend é obrigatória para operações críticas.
 
-## 14. Faltas, licenças e outras ocorrências
+Após uma correção, a situação deve ser atualizada mediante nova validação. A lista de pendências deve refletir o estado validado mais recente e preservar o histórico de resoluções e reaberturas.
 
-Faltas, licenças, férias e demais ocorrências aplicáveis devem ser registradas no sistema quando fizerem parte do processo de gestão da escala.
+Se a escala mudar após uma validação completa, o resultado anterior deve ser considerado desatualizado.
 
-Essas ocorrências devem preservar seu histórico e permitir a identificação de seu período.
+As regras detalhadas de fechamento, auditoria e relatórios devem ser mantidas nos documentos específicos correspondentes.
 
-Quando uma ocorrência afetar uma escala já planejada ou materializada, o registro da ocorrência não deve apagar silenciosamente a decisão anterior.
+15. Alterações posteriores e preservação do planejamento
 
-Os efeitos de cada tipo de ocorrência sobre planejamento, materialização, execução, carga horária e compensação devem ser definidos em `07-intercorrencias-e-compensacoes.md`.
+Mudanças em cadastro, lotação, equipes, modelos, vigências, calendário ou ocorrências não podem apagar, substituir ou recalcular silenciosamente turnos existentes.
 
----
+O sistema deve identificar e sinalizar as escalas, os servidores, as datas ou os turnos potencialmente afetados.
 
-## 15. Compensações
+Gestor ou Supervisor, conforme o papel, as permissões e o âmbito de atuação, deve analisar o impacto e realizar as alterações autorizadas.
 
-Compensações devem preservar a informação sobre o planejamento original e registrar a ocorrência que deu origem à compensação.
+Escalas materializadas ou fechadas possuem proteção adicional. Sua versão oficial e seu histórico devem ser preservados. Alterações posteriores devem respeitar o estado da escala e o fluxo de reabertura aplicável.
 
-A compensação não deve apagar o histórico da escala original.
+A desativação de um servidor impede novas alocações, preserva o histórico e sinaliza escalas em elaboração que possam ter sido afetadas. Não cancela automaticamente plantões existentes.
 
-As regras de quando uma compensação é aplicável, como ela é registrada e como afeta a apuração devem ser definidas em `07-intercorrencias-e-compensacoes.md`.
+A reativação não reinclui automaticamente o servidor em escalas anteriores.
 
----
+16. Ocorrências
 
-## 16. Fechamento
+Faltas, licenças, férias e outras ocorrências aplicáveis devem ser registradas quando fizerem parte do processo de gestão da escala.
 
-Uma escala fechada não deve ser alterada livremente.
+Férias e licenças possuem períodos de início e fim. Uma falta deve estar vinculada a um plantão específico.
 
-Alterações posteriores ao fechamento dependem de autorização da Divisão de Enfermagem, conforme as permissões estabelecidas para o sistema.
+As ocorrências devem preservar o planejamento original e permitir identificar o período e os efeitos registrados.
 
-Alterações posteriores devem preservar rastreabilidade.
+O registro de uma ocorrência não apaga o plantão originalmente planejado nem reescreve silenciosamente uma escala materializada.
 
-O fechamento não deve apagar ou substituir o histórico anterior da escala.
+Os efeitos de cada tipo de ocorrência sobre planejamento, execução, carga horária e compensação devem ser definidos em "07-intercorrencias-e-compensacoes.md".
 
-As regras detalhadas de fechamento, autorização e auditoria devem ser definidas em `09-fechamento-e-auditoria.md`.
+17. Compensações
 
----
+Uma falta pode ser classificada pelo Gestor como sem compensação ou com compensação.
 
-## 17. Consistência
+Somente uma falta classificada como compensável gera dívida de horas.
 
-O sistema deve impedir ou sinalizar situações incompatíveis com regras de negócio já definidas.
+A dívida corresponde à duração integral do plantão original:
 
-Entre os exemplos:
+- SD ou SN: 12 horas;
+- DN: 24 horas.
 
-* duplicidade de matrícula;
-* alocação incompatível com a lotação, quando a regra aplicável estiver definida;
-* intervalo inferior ao permitido;
-* jornada de 36 horas;
-* nova alocação de servidor que não esteja ativo;
-* combinações de jornadas incompatíveis;
-* outras violações das regras de jornada, lotação, cobertura ou fechamento.
+A compensação exige jornadas completas, sem quitação parcial. Uma dívida de 12 horas exige uma jornada completa de 12 horas. Uma dívida de 24 horas pode ser quitada por uma jornada completa de 24 horas ou por duas jornadas completas de 12 horas.
+
+A inclusão de um plantão futuro não quita automaticamente a dívida. A quitação deve ser registrada explicitamente.
+
+APH não quita automaticamente dívidas de compensação.
+
+A compensação é um controle administrativo de horas, não um cálculo de folha de pagamento. As regras detalhadas devem permanecer em "07-intercorrencias-e-compensacoes.md".
+
+18. Materialização
+
+Materializar significa registrar os plantões concretos planejados para um período.
+
+A materialização exige validação completa e não deve prosseguir enquanto houver bloqueios impeditivos não resolvidos.
+
+A operação deve registrar a versão do planejamento, incluindo unidade, período, servidores, turnos, responsável, data e resultado da validação, além das informações necessárias à auditoria.
+
+Materialização não confirma a realização efetiva do trabalho e não equivale a fechamento ou publicação.
+
+Depois de materializada, a versão deve permanecer preservada. Alterações posteriores em cadastros, equipes, modelos, vigências ou calendários não podem reescrever silenciosamente seus registros.
+
+19. Fechamento, reabertura e publicação
+
+Gestor e Supervisor podem materializar e fechar escalas dentro de seus respectivos âmbitos de atuação.
+
+Somente Supervisor pode reabrir uma escala fechada, respeitando as permissões aplicáveis. A reabertura exige justificativa e registro de auditoria.
+
+O fechamento exige confirmação explícita, validação atualizada no backend e verificação de que a versão não mudou desde a validação.
+
+A escala fechada fica protegida contra edições operacionais comuns. A existência de uma ocorrência ou falta não impede automaticamente o fechamento.
+
+A reabertura não apaga a versão fechada anterior. A versão revisada deve passar novamente pelo processo de validação, materialização, quando aplicável, fechamento e publicação.
+
+O sistema deve permitir comparar versões, identificando turnos adicionados, removidos ou alterados e mudanças relevantes de carga horária, conflitos e dimensionamento.
+
+Após o fechamento, o sistema inicia a notificação dos servidores afetados por e-mail, com link seguro para consultar a própria escala. Falha no envio de e-mail não desfaz o fechamento.
+
+As regras detalhadas devem permanecer em "09-fechamento-e-auditoria.md".
+
+20. Histórico e rastreabilidade
+
+Alterações relevantes nos dados e nas escalas devem preservar histórico quando sua natureza exigir rastreabilidade.
+
+O sistema deve permitir distinguir, conforme aplicável:
+
+- estado anterior e posterior;
+- responsável pela operação;
+- data e hora;
+- motivo da reabertura, quando aplicável;
+- versões materializadas e fechadas;
+- alterações cadastrais e de lotação;
+- geração, aplicação e revisão de propostas;
+- validações e pendências;
+- ocorrências, decisões de compensação e quitações;
+- publicações e notificações.
+
+O modelo técnico de auditoria, os dados exatos de cada evento e a política de retenção serão definidos na etapa de arquitetura.
+
+O sistema não deve apagar silenciosamente decisões anteriormente materializadas.
+
+21. Consistência
+
+O sistema deve impedir ou sinalizar situações incompatíveis com regras de negócio já definidas, incluindo:
+
+- duplicidade de matrícula;
+- nova alocação de servidor inativo;
+- incompatibilidade de alocação com as regras de lotação;
+- sobreposição de jornadas;
+- intervalo inferior ao mínimo permitido;
+- sequências proibidas de 36 horas;
+- combinações incompatíveis de jornadas;
+- conflitos entre escala ordinária e APH;
+- insuficiências ou excessos de cobertura;
+- alterações não autorizadas em escalas materializadas ou fechadas.
 
 A validação não deve criar uma nova regra de negócio.
 
 Quando uma situação puder possuir mais de uma interpretação válida, a regra deve ser definida antes de sua implementação.
 
----
+22. Fonte da verdade e documentação
 
-## 18. Histórico e rastreabilidade
+Este documento, juntamente com os demais documentos funcionais aprovados em "docs/", constitui a fonte de verdade das regras de negócio do Escalar.
 
-Alterações relevantes nos dados e na escala devem preservar histórico quando a natureza da informação exigir rastreabilidade.
+Este documento define princípios e regras transversais. As regras detalhadas de cada domínio devem permanecer nos documentos específicos correspondentes.
 
-O sistema não deve apagar silenciosamente decisões anteriormente materializadas.
+Nenhuma implementação deve criar comportamento de negócio apenas por conveniência técnica.
 
-Deve ser possível distinguir alterações cadastrais, alterações de escala, ocorrências e alterações posteriores ao fechamento conforme as regras específicas de cada domínio.
-
-As regras detalhadas de auditoria devem ser definidas em `09-fechamento-e-auditoria.md`.
-
----
-
-## 19. Automação e decisão do gestor
-
-A automação do Escalar deve atuar como mecanismo de apoio à decisão.
-
-O sistema pode:
-
-* sugerir alocações;
-* identificar conflitos;
-* validar regras;
-* apontar insuficiência de cobertura;
-* auxiliar na construção da escala;
-* identificar possíveis inconsistências.
-
-O sistema não deve, sem autorização prevista nas regras, substituir a decisão do gestor ou alterar silenciosamente uma escala já definida.
-
-Quando houver conflito entre uma sugestão automática e uma decisão explícita do gestor, a decisão do gestor deve prevalecer, desde que não viole uma regra que o sistema deva obrigatoriamente impedir.
-
----
-
-## 20. Regra para agentes
+23. Regra para agentes
 
 Agentes utilizados no desenvolvimento do Escalar não devem criar regras de negócio ausentes da documentação.
 
-Quando houver dúvida funcional, ambiguidade ou ausência de definição:
+Quando houver dúvida funcional, ambiguidade, contradição ou ausência de definição:
 
 1. a questão deve ser identificada;
 2. nenhuma interpretação deve ser transformada automaticamente em regra oficial;
@@ -308,28 +381,4 @@ Quando houver dúvida funcional, ambiguidade ou ausência de definição:
 
 Decisões técnicas podem ser tomadas durante a implementação quando não alterarem o comportamento de negócio previamente definido.
 
----
-
-## 21. Princípio de preservação da decisão
-
-Uma regra fundamental do Escalar é:
-
-> **Uma decisão materializada não deve ser silenciosamente reescrita por uma alteração posterior de cadastro, modelo, lotação, ocorrência ou configuração.**
-
-Quando uma mudança posterior afetar a execução da escala, o sistema deve preservar a informação anterior e registrar a nova situação conforme as regras específicas do domínio.
-
-A escala materializada permanece como registro da decisão tomada para aquele período.
-
----
-
-## 22. Fonte da verdade
-
-Este documento, juntamente com os demais documentos funcionais aprovados em `docs/`, constitui a fonte de verdade das regras de negócio do Escalar.
-
-Este documento define princípios e regras transversais.
-
-As regras detalhadas de cada domínio devem permanecer nos documentos específicos correspondentes.
-
-Nenhuma implementação deve criar comportamento de negócio apenas por conveniência técnica.
-
-Quando uma regra ainda não estiver definida, ela deve ser tratada como uma pendência de especificação até que seja decidida e documentada.
+«Princípio de preservação da decisão: uma decisão materializada não deve ser silenciosamente reescrita por uma alteração posterior de cadastro, modelo, lotação, ocorrência ou configuração.»
